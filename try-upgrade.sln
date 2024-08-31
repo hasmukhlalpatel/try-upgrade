@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1B05B9D4-C8C1-4B7D-8F1B-86716E8F75DA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{9AABD3A1-9480-41A8-9A4C-E0ECE7FB99DA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "try-upgrade", "src\try-upgrade\try-upgrade.csproj", "{D4793442-EB15-4EED-81AA-96ACFBD9350B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D4793442-EB15-4EED-81AA-96ACFBD9350B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4793442-EB15-4EED-81AA-96ACFBD9350B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4793442-EB15-4EED-81AA-96ACFBD9350B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4793442-EB15-4EED-81AA-96ACFBD9350B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D4793442-EB15-4EED-81AA-96ACFBD9350B} = {1B05B9D4-C8C1-4B7D-8F1B-86716E8F75DA}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B352B53F-4C63-4C25-A993-32AC5FB31FAE}
+	EndGlobalSection
+EndGlobal
