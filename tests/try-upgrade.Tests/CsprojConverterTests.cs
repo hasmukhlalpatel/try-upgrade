@@ -23,10 +23,21 @@ namespace try_upgrade.Tests
         [Fact]
         public void Convert_ShouldConvertCsprojCorrectly()
         {
+            var csPRojFilePath = AppDomain.CurrentDomain.BaseDirectory.Split("\\tests\\")[0] + "\\Samples\\Console4x.App\\Console4x.App.csproj";
+            var directoryPath = Path.GetDirectoryName(csPRojFilePath);
+            var csFiles = Directory.EnumerateFiles(directoryPath, "*.cs").ToArray();
+            var csProjFileText = File.ReadAllText(csPRojFilePath);
+            //csProjFileText = TestCsprojContent;
+            csProjFileText = csProjFileText.Replace("xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\"", string.Empty);
             // Arrange
+            var xDoc = XDocument.Parse(csProjFileText);
             var fileServiceMock = new Mock<IFileService>();
+            fileServiceMock.Setup(x=>x.GetFilesInDirectory(It.IsAny<string>(), It.IsAny<string>())).Returns(()=> csFiles);
             var xDocumentServiceMock = new Mock<IXDocumentService>();
-            xDocumentServiceMock.Setup(l => l.Load(It.IsAny<string>())).Returns(XDocument.Parse(TestCsprojContent));
+            xDocumentServiceMock
+                .Setup(l => l.Load(It.IsAny<string>()))
+                .Returns(xDoc);
+
             var converter = new CsprojConverter("test.csproj", fileServiceMock.Object, xDocumentServiceMock.Object);
 
             // Act

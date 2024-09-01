@@ -36,7 +36,7 @@ namespace try_upgrade.Converters
             }
 
             // Replace <Reference> with <PackageReference>
-            var references = root.Descendants(CsprojConstants.ReferenceElementName);
+            var references = root.Descendants(CsprojConstants.ReferenceElementName).ToList();
             foreach (var reference in references)
             {
                 var packageReference = new XElement(CsprojConstants.PackageReferenceElementName);
