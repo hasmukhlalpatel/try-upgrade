@@ -1,32 +1,5 @@
-﻿using System.Xml.Linq;
-
-namespace try_upgrade.Services
+﻿namespace try_upgrade.Services
 {
-    public interface IXDocumentService
-    {
-        XDocument Load(string filePath);
-        void Save(XDocument document, string filePath);
-    }
-
-    public class XDocumentService : IXDocumentService
-    {
-        public XDocument Load(string filePath)
-        {
-            return XDocument.Load(filePath);
-        }
-        public void Save(XDocument document, string filePath)
-        {
-            document.Save(filePath);
-        }
-    }
-
-    public interface IFileService
-    {
-        IEnumerable<string> GetFilesInDirectory(string directoryPath, string fileExtension);
-        string GetDirectoryPath(string filePath);
-        bool FileExists(string directoryPath, string filePath);
-        bool FileExists(string filePath);
-    }
 
     public class FileSystemFileService : IFileService
     {
