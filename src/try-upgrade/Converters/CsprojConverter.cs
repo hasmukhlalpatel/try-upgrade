@@ -1,72 +1,28 @@
-﻿using System.IO;
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
+using try_upgrade.Services;
 //https://gemini.google.com/app/5db6fc21d05b4f83
 namespace try_upgrade.Converters
 {
-    public interface IXDocumentLoader
-    {
-        XDocument Load(string filePath);
-    }
-
-    public interface IXDocumentSaver
-    {
-        void Save(XDocument document, string filePath);
-    }
-
-    public class FileSystemDocumentLoader : IXDocumentLoader
-    {
-        public XDocument Load(string filePath)
-        {
-            return XDocument.Load(filePath);
-        }
-    }
-
-    public class FileSystemDocumentSaver : IXDocumentSaver
-    {
-        public void Save(XDocument document, string filePath)
-        {
-            document.Save(filePath);
-        }
-    }
-    public interface IFileService
-    {
-        IEnumerable<string> GetFilesInDirectory(string directoryPath, string fileExtension);
-        bool FileExists(string filePath);
-    }
-
-    public class FileSystemFileService : IFileService
-    {
-        public IEnumerable<string> GetFilesInDirectory(string directoryPath, string fileExtension)
-        {
-            return Directory.EnumerateFiles(directoryPath, fileExtension, SearchOption.AllDirectories);
-        }
-
-        public bool FileExists(string filePath)
-        {
-            return File.Exists(filePath);
-        }
-    }
-
     public class CsprojConverter
     {
         private readonly string _csprojPath;
         private readonly IFileService _fileService;
-        private readonly IXDocumentLoader _loader;
-        private readonly IXDocumentSaver _saver;
+        private readonly IXDocumentService _xDocumentService;
         private readonly List<string> _excludedFiles = new();
-        private readonly List<string> _extraFiles = new();
+        private List<string> _extraFiles = new();
 
-        public CsprojConverter(string csprojPath, IFileService fileService, IXDocumentLoader loader, IXDocumentSaver saver)
+        public CsprojConverter(string csprojPath, IFileService fileService, IXDocumentService xDocumentService)
         {
             _csprojPath = csprojPath;
             _fileService = fileService;
-            _loader = loader;
-            _saver = saver;
+            _xDocumentService = xDocumentService;
         }
 
         public void Convert()
         {
-            var xdoc = _loader.Load(_csprojPath);
+            var xdoc = _xDocumentService.Load(_csprojPath);
+            var directoryPath = _fileService.GetDirectoryPath(_csprojPath);
+
             var root = xdoc.Root;
 
             // Remove unnecessary elements from <PropertyGroup>
@@ -102,8 +58,8 @@ namespace try_upgrade.Converters
                 var excludedAttribute = compileElement.Attribute(CsprojConstants.ExcludedFromBuildAttribute);
                 if (excludedAttribute != null && excludedAttribute.Value == CsprojConstants.TrueValue)
                 {
-                    var filePath = _fileService.Combine(_fileService.GetDirectoryName(_csprojPath), compileElement.Attribute(CsprojConstants.IncludeAttribute).Value);
-                    if (_fileService.FileExists(filePath))
+                    var filePath = compileElement.Attribute(CsprojConstants.IncludeAttribute).Value;
+                    if (_fileService.FileExists(directoryPath, filePath))
                     {
                         _excludedFiles.Add(compileElement.Attribute(CsprojConstants.IncludeAttribute).Value);
                         compileElement.Remove();
@@ -112,7 +68,7 @@ namespace try_upgrade.Converters
             }
 
             // Get all .cs files in the project directory
-            var projectFiles = _fileService.GetFilesInDirectory(_fileService.GetDirectoryName(_csprojPath), CsprojConstants.CsFileExtension);
+            var projectFiles = _fileService.GetFilesInDirectory(directoryPath, CsprojConstants.CsFileExtension);
 
             // Compare with files included in <Compile> tags
             var includedFiles = root.Descendants(CsprojConstants.CompileElementName)
@@ -122,7 +78,7 @@ namespace try_upgrade.Converters
             // Find extra files
             _extraFiles = projectFiles.Except(includedFiles).ToList();
 
-            _saver.Save(xdoc, _csprojPath);
+            _xDocumentService.Save(xdoc, _csprojPath);
         }
 
         public IReadOnlyList<string> GetExcludedFiles()
@@ -134,23 +90,5 @@ namespace try_upgrade.Converters
         {
             return _extraFiles.AsReadOnly();
         }
-    }
-
-    public static class CsprojConstants
-    {
-        public const string TargetFrameworkElementName = "TargetFramework";
-        public const string OutputTypeElementName = "OutputType";
-        public const string AssemblyNameElementName = "AssemblyName";
-        public const string RootNamespaceElementName = "RootNamespace";
-        public const string ReferenceElementName = "Reference";
-        public const string PackageReferenceElementName = "PackageReference";
-        public const string IncludeAttribute = "Include";
-        public const string VersionAttribute = "Version";
-        public const string SubTypeElementName = "SubType";
-        public const string ExcludedFromBuildAttribute = "ExcludedFromBuild";
-        public const string ComponentValue = "Component";
-        public const string TrueValue = "true";
-        public const string CsFileExtension = "*.cs";
-        public const string CompileElementName = "Compile";
     }
 }
